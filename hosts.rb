@@ -2,9 +2,35 @@
 require "rubygems"
 require "gtk2"
 require "fileutils"
+require "yaml"
 
-def create_structure()
-	#TO-DO - Make /etc/hosts.d/ directory, inside, backup, and templates	
+def init()
+
+        Dir.mkdir("/etc/hosts.d") unless File.exists?("/etc/hosts.d")
+        Dir.mkdir("/etc/hosts.d/backup") unless File.exists?("/etc/hosts.d/backup")
+        Dir.mkdir("/etc/hosts.d/templates") unless File.exists?("/etc/hosts.d/templates")
+        Dir.mkdir("/etc/hosts.d/db") unless File.exists?("/etc/hosts.d/db")
+	
+end
+
+def load_config_file()
+	# LoadFile
+	
+	if File.exists?("/etc/hosts.d/hostsd.conf")
+        	loadedConf = YAML.load_file '/etc/hosts.d/hostsd.conf'
+	else
+        	raise "Missing config file, please check . . . exiting"
+        exit 1
+	end
+
+	# Load global conf
+
+	globalConf = loadedConf.fetch('global')
+	@root_path = globalConf['root_path']
+	@backup_path = globalConf['backup_path']
+	@template_path  = globalConf['template_path'] 
+	@sqlite_path = globalConf['sqlite_path'] 
+	
 end
 
 def bkp_hosts(hosts_path)
@@ -26,18 +52,13 @@ def check_hosts(hosts_path)
 	end
 end
 
-#def initialize(hosts_path)
-	#File.open('/etc/hosts', 'w')
-	# Initialize Hosts	
-#end
+### TODO checar se o diretório existe
+## se existir carregar arquivo de configuraçao
+##,senao executar init e uma arquivo de configuração demo e carrega-lo
 
-def parse_hosts(hosts_path)
 
-end
-
-bkp_hosts("/etc/hosts")
-status=check_hosts("/etc/hosts")
-puts status
+load_config_file
+puts @sqlite_path
 
 #Gtk.init
 #window = Gtk::Window.new
